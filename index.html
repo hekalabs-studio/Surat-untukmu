@@ -312,6 +312,10 @@
 </head>
 <body>
 
+    <audio id="bg-music" loop>
+        <source src="kebunku.mp3" type="audio/mpeg">
+    </audio>
+
     <div id="bg-effects"></div>
 
     <div class="container">
@@ -335,7 +339,7 @@
             <div class="letter-content" id="letterContent"></div>
             
             <div class="controls" id="controls" style="opacity: 0; transition: opacity 1s;">
-                <button class="btn" id="musicToggleBtn" onclick="toggleYouTubeMusic()">
+                <button class="btn" id="musicToggleBtn" onclick="toggleMusic()">
                     <span>🔇 Matikan Lagu</span>
                 </button>
                 <button class="btn" onclick="closeLetter()">
@@ -370,46 +374,23 @@ Bahagia selalu.`;
         const letterContent = document.getElementById('letterContent');
         const progressBar = document.getElementById('progressBar');
         const controls = document.getElementById('controls');
+        const bgMusic = document.getElementById('bg-music');
+        const musicToggleBtn = document.getElementById('musicToggleBtn');
         
         let isTyping = false;
         let isMusicPlaying = false;
 
         // --- Functions ---
         
-        // 1. YouTube Music Setup
-        function playYouTubeMusic() {
-            if (!document.getElementById('yt-music')) {
-                const iframe = document.createElement('iframe');
-                iframe.id = 'yt-music';
-                // Parameter YouTube untuk AutoPlay & Loop
-                iframe.src = "https://www.youtube.com/embed/im99Picx79Q?autoplay=1&loop=1&playlist=im99Picx79Q";
-                iframe.allow = "autoplay";
-                // Sembunyikan iframe dari tampilan layar
-                iframe.style.position = "absolute";
-                iframe.style.width = "0px";
-                iframe.style.height = "0px";
-                iframe.style.border = "none";
-                iframe.style.left = "-9999px";
-                document.body.appendChild(iframe);
-            }
-        }
-
-        function stopYouTubeMusic() {
-            const player = document.getElementById('yt-music');
-            if (player) {
-                player.remove();
-            }
-        }
-
-        function toggleYouTubeMusic() {
-            const btn = document.getElementById('musicToggleBtn');
+        // 1. MP3 Music Controls
+        function toggleMusic() {
             if (isMusicPlaying) {
-                stopYouTubeMusic();
-                btn.innerHTML = '<span>🎵 Putar Lagu</span>';
+                bgMusic.pause();
+                musicToggleBtn.innerHTML = '<span>🎵 Putar Lagu</span>';
                 isMusicPlaying = false;
             } else {
-                playYouTubeMusic();
-                btn.innerHTML = '<span>🔇 Matikan Lagu</span>';
+                bgMusic.play().catch(e => console.log("Audio play dihentikan:", e));
+                musicToggleBtn.innerHTML = '<span>🔇 Matikan Lagu</span>';
                 isMusicPlaying = true;
             }
         }
@@ -419,10 +400,11 @@ Bahagia selalu.`;
             envelopeBtn.classList.add('open');
             createConfetti();
             
-            // Memicu lagu youtube saat amplop disentuh
-            playYouTubeMusic();
-            isMusicPlaying = true;
-            document.getElementById('musicToggleBtn').innerHTML = '<span>🔇 Matikan Lagu</span>';
+            // Memicu pemutaran MP3
+            bgMusic.play().then(() => {
+                isMusicPlaying = true;
+                musicToggleBtn.innerHTML = '<span>🔇 Matikan Lagu</span>';
+            }).catch(e => console.log("Gagal memutar audio, pastikan file tersedia:", e));
             
             // Wait for animation, then transition screens
             setTimeout(() => {
@@ -514,8 +496,10 @@ Bahagia selalu.`;
                 isTyping = false;
                 
                 // Matikan lagu ketika surat ditutup
-                stopYouTubeMusic();
+                bgMusic.pause();
+                bgMusic.currentTime = 0; // Reset lagu ke awal
                 isMusicPlaying = false;
+                musicToggleBtn.innerHTML = '<span>🎵 Putar Lagu</span>';
                 
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             }, 1000);
