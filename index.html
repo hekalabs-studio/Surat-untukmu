@@ -29,7 +29,6 @@
         body {
             background: linear-gradient(135deg, #fff0f3 0%, #ffc8dd 100%);
             min-height: 100vh;
-            /* Diperbaiki agar bisa di-scroll ke bawah */
             overflow-x: hidden; 
             overflow-y: auto;
             display: block; 
@@ -39,7 +38,7 @@
 
         /* Background Effects */
         #bg-effects {
-            position: fixed; /* Ubah ke fixed agar background tetap saat di-scroll */
+            position: fixed; 
             top: 0;
             left: 0;
             width: 100%;
@@ -63,7 +62,7 @@
 
         /* Click Ripple Hearts */
         .click-heart {
-            position: fixed; /* Ubah ke fixed untuk akurasi klik saat scroll */
+            position: fixed; 
             font-size: 20px;
             pointer-events: none;
             transform: translate(-50%, -50%);
@@ -76,14 +75,14 @@
             100% { transform: translate(-50%, -100px) scale(1.5); opacity: 0; }
         }
 
-        /* Main Container - Diperbaiki untuk scroll */
+        /* Main Container */
         .container {
             position: relative;
             z-index: 10;
             width: 100%;
             max-width: 800px;
-            margin: 0 auto; /* Tengah secara horizontal */
-            padding: 40px 20px; /* Jarak atas bawah agar tidak menempel di tepi layar */
+            margin: 0 auto; 
+            padding: 40px 20px; 
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -135,7 +134,7 @@
             box-shadow: 0 10px 30px rgba(216, 27, 96, 0.3);
         }
 
-        .envelope::before { /* Left/Right flaps */
+        .envelope::before { 
             content: '';
             position: absolute;
             top: 0;
@@ -173,7 +172,6 @@
             filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
         }
 
-        /* Envelope Open State */
         .envelope-wrapper.open .flap {
             transform: rotateX(180deg);
             z-index: 1;
@@ -202,7 +200,7 @@
 
         /* Letter Screen (Glassmorphism) */
         .letter-screen {
-            display: none; /* Hidden initially */
+            display: none; 
             width: 100%;
             max-width: 650px;
             background: var(--white-glass);
@@ -337,6 +335,9 @@
             <div class="letter-content" id="letterContent"></div>
             
             <div class="controls" id="controls" style="opacity: 0; transition: opacity 1s;">
+                <button class="btn" id="musicToggleBtn" onclick="toggleYouTubeMusic()">
+                    <span>🔇 Matikan Lagu</span>
+                </button>
                 <button class="btn" onclick="closeLetter()">
                     <span>✉️ Tutup Surat</span>
                 </button>
@@ -371,13 +372,57 @@ Bahagia selalu.`;
         const controls = document.getElementById('controls');
         
         let isTyping = false;
+        let isMusicPlaying = false;
 
         // --- Functions ---
         
-        // 1. Open Envelope Animation
+        // 1. YouTube Music Setup
+        function playYouTubeMusic() {
+            if (!document.getElementById('yt-music')) {
+                const iframe = document.createElement('iframe');
+                iframe.id = 'yt-music';
+                // Parameter YouTube untuk AutoPlay & Loop
+                iframe.src = "https://www.youtube.com/embed/im99Picx79Q?autoplay=1&loop=1&playlist=im99Picx79Q";
+                iframe.allow = "autoplay";
+                // Sembunyikan iframe dari tampilan layar
+                iframe.style.position = "absolute";
+                iframe.style.width = "0px";
+                iframe.style.height = "0px";
+                iframe.style.border = "none";
+                iframe.style.left = "-9999px";
+                document.body.appendChild(iframe);
+            }
+        }
+
+        function stopYouTubeMusic() {
+            const player = document.getElementById('yt-music');
+            if (player) {
+                player.remove();
+            }
+        }
+
+        function toggleYouTubeMusic() {
+            const btn = document.getElementById('musicToggleBtn');
+            if (isMusicPlaying) {
+                stopYouTubeMusic();
+                btn.innerHTML = '<span>🎵 Putar Lagu</span>';
+                isMusicPlaying = false;
+            } else {
+                playYouTubeMusic();
+                btn.innerHTML = '<span>🔇 Matikan Lagu</span>';
+                isMusicPlaying = true;
+            }
+        }
+
+        // 2. Open Envelope Animation
         function openEnvelope() {
             envelopeBtn.classList.add('open');
             createConfetti();
+            
+            // Memicu lagu youtube saat amplop disentuh
+            playYouTubeMusic();
+            isMusicPlaying = true;
+            document.getElementById('musicToggleBtn').innerHTML = '<span>🔇 Matikan Lagu</span>';
             
             // Wait for animation, then transition screens
             setTimeout(() => {
@@ -399,15 +444,13 @@ Bahagia selalu.`;
             }, 1500);
         }
 
-        // 2. Typewriter Effect
+        // 3. Typewriter Effect
         function startTypewriter() {
             if (isTyping) return;
             isTyping = true;
             letterContent.innerHTML = '';
             
-            // Mengubah double newline menjadi tag <br>
             const formattedText = letterText.replace(/\n\n/g, '<br><br>').replace(/\n/g, '<br>');
-            
             const tempDiv = document.createElement('div');
             tempDiv.innerHTML = formattedText;
             const nodes = Array.from(tempDiv.childNodes);
@@ -418,7 +461,7 @@ Bahagia selalu.`;
             function typeNode(nodeIndex) {
                 if (nodeIndex >= nodes.length) {
                     isTyping = false;
-                    controls.style.opacity = '1'; // Show buttons when done
+                    controls.style.opacity = '1'; 
                     return;
                 }
 
@@ -434,7 +477,6 @@ Bahagia selalu.`;
                             charIndex++;
                             currentLength++;
                             
-                            // Update Progress Bar
                             const progress = (currentLength / totalLength) * 100;
                             progressBar.style.width = `${progress}%`;
                             
@@ -443,7 +485,6 @@ Bahagia selalu.`;
                                 window.scrollBy(0, 1);
                             }
 
-                            // Kecepatan ketik: 40ms per huruf
                             setTimeout(typeChar, 40);
                         } else {
                             typeNode(nodeIndex + 1);
@@ -451,7 +492,6 @@ Bahagia selalu.`;
                     }
                     typeChar();
                 } else if (node.nodeType === Node.ELEMENT_NODE) {
-                    // Jika itu tag <br>
                     letterContent.appendChild(node.cloneNode());
                     typeNode(nodeIndex + 1);
                 }
@@ -460,7 +500,7 @@ Bahagia selalu.`;
             typeNode(0);
         }
 
-        // 3. Close Letter
+        // 4. Close Letter
         function closeLetter() {
             letterScreen.classList.remove('visible');
             setTimeout(() => {
@@ -468,17 +508,20 @@ Bahagia selalu.`;
                 openingScreen.style.display = 'flex';
                 openingScreen.style.opacity = '1';
                 envelopeBtn.classList.remove('open');
-                letterContent.innerHTML = ''; // Reset text
+                letterContent.innerHTML = ''; 
                 progressBar.style.width = '0%';
                 controls.style.opacity = '0';
                 isTyping = false;
                 
-                // Scroll kembali ke atas
+                // Matikan lagu ketika surat ditutup
+                stopYouTubeMusic();
+                isMusicPlaying = false;
+                
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             }, 1000);
         }
 
-        // 4. Background Effects (Floating Hearts & Sparkles)
+        // 5. Background Effects 
         function createBackgroundElements() {
             const bgContainer = document.getElementById('bg-effects');
             const items = ['🤍', '🌸', '✨', '💖', '💕'];
@@ -488,30 +531,26 @@ Bahagia selalu.`;
                 el.innerText = items[Math.floor(Math.random() * items.length)];
                 el.classList.add('floating-heart');
                 
-                // Randomize position, size, and duration
                 el.style.left = Math.random() * 100 + 'vw';
                 el.style.fontSize = (Math.random() * 15 + 10) + 'px';
                 el.style.animationDuration = (Math.random() * 3 + 4) + 's';
                 
                 bgContainer.appendChild(el);
                 
-                // Remove after animation ends to prevent DOM overload
                 setTimeout(() => {
                     el.remove();
                 }, 7000);
             }, 400); 
         }
 
-        // 5. Click/Touch Ripple Effect
+        // 6. Click/Touch Ripple Effect
         document.addEventListener('click', function(e) {
-            // Hindari memunculkan hati jika mengklik tombol
             if(e.target.closest('button') || e.target.closest('.envelope-wrapper')) return;
 
             const heart = document.createElement('div');
             heart.classList.add('click-heart');
             heart.innerHTML = '💖';
             
-            // Disesuaikan agar posisinya pas walaupun halaman di-scroll
             heart.style.left = e.clientX + 'px';
             heart.style.top = e.clientY + 'px';
             document.body.appendChild(heart);
@@ -521,7 +560,7 @@ Bahagia selalu.`;
             }, 1000);
         });
 
-        // 6. Confetti Effect upon opening envelope
+        // 7. Confetti Effect 
         function createConfetti() {
             for(let i=0; i<15; i++) {
                 setTimeout(() => {
@@ -539,7 +578,6 @@ Bahagia selalu.`;
             }
         }
 
-        // Initialize Background
         createBackgroundElements();
 
     </script>
