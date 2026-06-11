@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Surat Terakhir 💌</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --pink-bg: #ffe6ea;
+            --pink-soft: #ffb6c1;
+            --pink-main: #ff69b4;
+            --pink-dark: #d81b60;
+            --white-glass: rgba(255, 255, 255, 0.65);
+            --text-main: #4a4a4a;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #fff0f3 0%, #ffc8dd 100%);
+            min-height: 100vh;
+            /* Diperbaiki agar bisa di-scroll ke bawah */
+            overflow-x: hidden; 
+            overflow-y: auto;
+            display: block; 
+            color: var(--text-main);
+            position: relative;
+        }
+
+        /* Background Effects */
+        #bg-effects {
+            position: fixed; /* Ubah ke fixed agar background tetap saat di-scroll */
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .floating-heart, .sparkle {
+            position: absolute;
+            opacity: 0;
+            animation: floatUp 6s linear infinite;
+        }
+
+        @keyframes floatUp {
+            0% { transform: translateY(100vh) scale(0.5) rotate(0deg); opacity: 0; }
+            20% { opacity: 0.6; }
+            80% { opacity: 0.6; }
+            100% { transform: translateY(-100px) scale(1.2) rotate(360deg); opacity: 0; }
+        }
+
+        /* Click Ripple Hearts */
+        .click-heart {
+            position: fixed; /* Ubah ke fixed untuk akurasi klik saat scroll */
+            font-size: 20px;
+            pointer-events: none;
+            transform: translate(-50%, -50%);
+            animation: popOut 1s ease-out forwards;
+            z-index: 999;
+        }
+
+        @keyframes popOut {
+            0% { transform: translate(-50%, -50%) scale(0.5); opacity: 1; }
+            100% { transform: translate(-50%, -100px) scale(1.5); opacity: 0; }
+        }
+
+        /* Main Container - Diperbaiki untuk scroll */
+        .container {
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto; /* Tengah secara horizontal */
+            padding: 40px 20px; /* Jarak atas bawah agar tidak menempel di tepi layar */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        /* Opening Screen (Envelope) */
+        .opening-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: opacity 1s ease, transform 1s ease;
+        }
+
+        .opening-title {
+            font-family: 'Dancing Script', cursive;
+            font-size: 2.5rem;
+            color: var(--pink-dark);
+            margin-bottom: 40px;
+            text-align: center;
+            text-shadow: 2px 2px 4px rgba(255, 105, 180, 0.2);
+            animation: pulseGlow 2s infinite alternate;
+        }
+
+        @keyframes pulseGlow {
+            0% { text-shadow: 0 0 5px rgba(255, 105, 180, 0.2); transform: scale(1); }
+            100% { text-shadow: 0 0 20px rgba(255, 105, 180, 0.6); transform: scale(1.02); }
+        }
+
+        /* 3D Envelope CSS */
+        .envelope-wrapper {
+            position: relative;
+            cursor: pointer;
+            animation: hoverFloat 3s ease-in-out infinite;
+        }
+
+        @keyframes hoverFloat {
+            0%, 100% { transform: translateY(0); box-shadow: 0 15px 25px rgba(255, 105, 180, 0.3); }
+            50% { transform: translateY(-15px); box-shadow: 0 30px 30px rgba(255, 105, 180, 0.2); }
+        }
+
+        .envelope {
+            position: relative;
+            width: 300px;
+            height: 200px;
+            background: #ffa6c9;
+            border-radius: 0 0 10px 10px;
+            box-shadow: 0 10px 30px rgba(216, 27, 96, 0.3);
+        }
+
+        .envelope::before { /* Left/Right flaps */
+            content: '';
+            position: absolute;
+            top: 0;
+            width: 0;
+            height: 0;
+            border-left: 150px solid #ffb6c1;
+            border-right: 150px solid #ffb6c1;
+            border-top: 100px solid transparent;
+            border-bottom: 100px solid #ff85b3;
+            border-radius: 0 0 10px 10px;
+            z-index: 3;
+        }
+
+        .flap {
+            position: absolute;
+            top: 0;
+            left: 0;
+            border-left: 150px solid transparent;
+            border-right: 150px solid transparent;
+            border-top: 120px solid #ff7eb3;
+            transform-origin: top;
+            transition: transform 0.8s ease-in-out, z-index 0.2s;
+            z-index: 4;
+        }
+
+        .heart-seal {
+            position: absolute;
+            top: 100px;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 30px;
+            color: #d81b60;
+            z-index: 5;
+            transition: opacity 0.3s;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+        }
+
+        /* Envelope Open State */
+        .envelope-wrapper.open .flap {
+            transform: rotateX(180deg);
+            z-index: 1;
+        }
+        .envelope-wrapper.open .heart-seal {
+            opacity: 0;
+        }
+        .envelope-wrapper.open .letter-preview {
+            transform: translateY(-80px);
+            opacity: 1;
+        }
+
+        .letter-preview {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            width: 280px;
+            height: 180px;
+            background: white;
+            border-radius: 8px;
+            z-index: 2;
+            transition: transform 1s ease-in-out, opacity 1s;
+            opacity: 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        /* Letter Screen (Glassmorphism) */
+        .letter-screen {
+            display: none; /* Hidden initially */
+            width: 100%;
+            max-width: 650px;
+            background: var(--white-glass);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            border-radius: 24px;
+            padding: 40px;
+            box-shadow: 0 20px 50px rgba(255, 105, 180, 0.2);
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 1s ease, transform 1s ease;
+        }
+
+        .letter-screen.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .progress-bar-container {
+            width: 100%;
+            height: 4px;
+            background: rgba(255, 182, 193, 0.3);
+            border-radius: 2px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background: var(--pink-main);
+            transition: width 0.2s;
+        }
+
+        .letter-content {
+            font-size: 1rem;
+            line-height: 1.8;
+            color: var(--text-main);
+            min-height: 200px;
+            margin-bottom: 30px;
+            text-align: justify;
+        }
+
+        .letter-content span {
+            opacity: 0;
+            animation: fadeInChar 0.1s forwards;
+        }
+
+        @keyframes fadeInChar {
+            to { opacity: 1; }
+        }
+
+        /* Controls / Buttons */
+        .controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            background: rgba(255, 255, 255, 0.8);
+            border: 1px solid var(--pink-soft);
+            color: var(--pink-dark);
+            padding: 10px 24px;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            backdrop-filter: blur(5px);
+            box-shadow: 0 4px 15px rgba(255, 105, 180, 0.1);
+        }
+
+        .btn:hover {
+            background: var(--pink-main);
+            color: white;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(255, 105, 180, 0.3);
+        }
+
+        /* Mobile Adjustments */
+        @media (max-width: 600px) {
+            .envelope { width: 260px; height: 180px; }
+            .envelope::before {
+                border-left: 130px solid #ffb6c1;
+                border-right: 130px solid #ffb6c1;
+                border-top: 90px solid transparent;
+                border-bottom: 90px solid #ff85b3;
+            }
+            .flap {
+                border-left: 130px solid transparent;
+                border-right: 130px solid transparent;
+                border-top: 100px solid #ff7eb3;
+            }
+            .letter-preview { width: 240px; height: 160px; }
+            .letter-screen { padding: 25px; }
+            .letter-content { font-size: 0.95rem; }
+            .opening-title { font-size: 2rem; }
+            .controls { flex-direction: column; width: 100%; }
+            .btn { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="bg-effects"></div>
+
+    <div class="container">
+        <div class="opening-screen" id="openingScreen">
+            <h1 class="opening-title">Sebuah pesan kecil untukmu 💌</h1>
+            <div class="envelope-wrapper" id="envelopeBtn" onclick="openEnvelope()">
+                <div class="envelope">
+                    <div class="flap"></div>
+                    <div class="letter-preview"></div>
+                    <div class="heart-seal">❤️</div>
+                </div>
+            </div>
+            <p style="margin-top: 30px; font-size: 0.9rem; color: #d81b60; opacity: 0.7; animation: pulseGlow 2s infinite alternate;">(Sentuh amplopnya)</p>
+        </div>
+
+        <div class="letter-screen" id="letterScreen">
+            <div class="progress-bar-container">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+            
+            <div class="letter-content" id="letterContent"></div>
+            
+            <div class="controls" id="controls" style="opacity: 0; transition: opacity 1s;">
+                <button class="btn" onclick="closeLetter()">
+                    <span>✉️ Tutup Surat</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- TEXT SURAT ---
+        const letterText = `Hai, gimanaa kabarnya semoga kamu selalu baik dan bahagia. Maaf kalau pesan ini sampai lewat perantara soalnya aku cuma engga mau Ngechat kamu yang ga penting.
+
+Aku cuma ingin berterima kasih karena pernah hadir di hidup aku. Dari kamu, aku belajar kalau ketulusan nggak selalu harus berakhir dengan memiliki. Aku juga belajar bahwa nggak semua yang diperjuangkan akan berjalan sesuai harapan, dan itu nggak apa-apa.
+
+Kalau selama ini aku pernah terlalu berlebihan, terlalu berharap, atau tanpa sadar bikin kamu nggak nyaman, aku minta maaf. Semua yang aku lakukan waktu itu karena aku benar-benar tulus. Tapi sekarang aku sadar kalau perasaan memang nggak bisa dipaksa.
+
+Karena itu, aku memilih untuk berhenti mengejar dan belajar mengikhlaskan. Bukan karena semuanya nggak berarti, justru karena semuanya berarti, aku memilih menghargai keputusan dan kebahagiaan kamu.
+
+Semoga hubungan kamu berjalan baik dan semoga kamu selalu dipertemukan dengan hal-hal yang membuat kamu bahagia. Tentang hadiah dari aku, simpan aja kalau berkenan, kalau nggak juga nggak apa-apa kok.
+
+Setelah kita berhenti mengirim pesan, aku harap jadimu baik baik saja, dan selalu bahagia, aku selalu menyemangati mu dari kejauhan.
+
+Terakhir, makasih untuk semua kenangan yang pernah ada. Aku nggak akan ganggu kamu lagi. Jaga diri baik-baik ya, dan semoga semua hal baik selalu datang ke hidup kamu, senang mencintai mu sedalam ini.
+
+Bahagia selalu.`;
+
+        // --- DOM Elements ---
+        const openingScreen = document.getElementById('openingScreen');
+        const envelopeBtn = document.getElementById('envelopeBtn');
+        const letterScreen = document.getElementById('letterScreen');
+        const letterContent = document.getElementById('letterContent');
+        const progressBar = document.getElementById('progressBar');
+        const controls = document.getElementById('controls');
+        
+        let isTyping = false;
+
+        // --- Functions ---
+        
+        // 1. Open Envelope Animation
+        function openEnvelope() {
+            envelopeBtn.classList.add('open');
+            createConfetti();
+            
+            // Wait for animation, then transition screens
+            setTimeout(() => {
+                openingScreen.style.opacity = '0';
+                setTimeout(() => {
+                    openingScreen.style.display = 'none';
+                    letterScreen.style.display = 'block';
+                    
+                    // Trigger reflow to apply transition
+                    void letterScreen.offsetWidth;
+                    letterScreen.classList.add('visible');
+                    
+                    // Auto-scroll to top just in case
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+
+                    // Start Typewriter
+                    setTimeout(startTypewriter, 500);
+                }, 1000);
+            }, 1500);
+        }
+
+        // 2. Typewriter Effect
+        function startTypewriter() {
+            if (isTyping) return;
+            isTyping = true;
+            letterContent.innerHTML = '';
+            
+            // Mengubah double newline menjadi tag <br>
+            const formattedText = letterText.replace(/\n\n/g, '<br><br>').replace(/\n/g, '<br>');
+            
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = formattedText;
+            const nodes = Array.from(tempDiv.childNodes);
+            
+            let totalLength = letterText.length;
+            let currentLength = 0;
+
+            function typeNode(nodeIndex) {
+                if (nodeIndex >= nodes.length) {
+                    isTyping = false;
+                    controls.style.opacity = '1'; // Show buttons when done
+                    return;
+                }
+
+                const node = nodes[nodeIndex];
+
+                if (node.nodeType === Node.TEXT_NODE) {
+                    const text = node.textContent;
+                    let charIndex = 0;
+
+                    function typeChar() {
+                        if (charIndex < text.length) {
+                            letterContent.innerHTML += text.charAt(charIndex);
+                            charIndex++;
+                            currentLength++;
+                            
+                            // Update Progress Bar
+                            const progress = (currentLength / totalLength) * 100;
+                            progressBar.style.width = `${progress}%`;
+                            
+                            // Scroll otomatis ke bawah perlahan jika teks melebihi layar
+                            if (window.innerHeight < document.body.scrollHeight) {
+                                window.scrollBy(0, 1);
+                            }
+
+                            // Kecepatan ketik: 40ms per huruf
+                            setTimeout(typeChar, 40);
+                        } else {
+                            typeNode(nodeIndex + 1);
+                        }
+                    }
+                    typeChar();
+                } else if (node.nodeType === Node.ELEMENT_NODE) {
+                    // Jika itu tag <br>
+                    letterContent.appendChild(node.cloneNode());
+                    typeNode(nodeIndex + 1);
+                }
+            }
+
+            typeNode(0);
+        }
+
+        // 3. Close Letter
+        function closeLetter() {
+            letterScreen.classList.remove('visible');
+            setTimeout(() => {
+                letterScreen.style.display = 'none';
+                openingScreen.style.display = 'flex';
+                openingScreen.style.opacity = '1';
+                envelopeBtn.classList.remove('open');
+                letterContent.innerHTML = ''; // Reset text
+                progressBar.style.width = '0%';
+                controls.style.opacity = '0';
+                isTyping = false;
+                
+                // Scroll kembali ke atas
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }, 1000);
+        }
+
+        // 4. Background Effects (Floating Hearts & Sparkles)
+        function createBackgroundElements() {
+            const bgContainer = document.getElementById('bg-effects');
+            const items = ['🤍', '🌸', '✨', '💖', '💕'];
+            
+            setInterval(() => {
+                const el = document.createElement('div');
+                el.innerText = items[Math.floor(Math.random() * items.length)];
+                el.classList.add('floating-heart');
+                
+                // Randomize position, size, and duration
+                el.style.left = Math.random() * 100 + 'vw';
+                el.style.fontSize = (Math.random() * 15 + 10) + 'px';
+                el.style.animationDuration = (Math.random() * 3 + 4) + 's';
+                
+                bgContainer.appendChild(el);
+                
+                // Remove after animation ends to prevent DOM overload
+                setTimeout(() => {
+                    el.remove();
+                }, 7000);
+            }, 400); 
+        }
+
+        // 5. Click/Touch Ripple Effect
+        document.addEventListener('click', function(e) {
+            // Hindari memunculkan hati jika mengklik tombol
+            if(e.target.closest('button') || e.target.closest('.envelope-wrapper')) return;
+
+            const heart = document.createElement('div');
+            heart.classList.add('click-heart');
+            heart.innerHTML = '💖';
+            
+            // Disesuaikan agar posisinya pas walaupun halaman di-scroll
+            heart.style.left = e.clientX + 'px';
+            heart.style.top = e.clientY + 'px';
+            document.body.appendChild(heart);
+
+            setTimeout(() => {
+                heart.remove();
+            }, 1000);
+        });
+
+        // 6. Confetti Effect upon opening envelope
+        function createConfetti() {
+            for(let i=0; i<15; i++) {
+                setTimeout(() => {
+                    const confetti = document.createElement('div');
+                    confetti.innerHTML = '✨';
+                    confetti.classList.add('click-heart');
+                    
+                    const rect = envelopeBtn.getBoundingClientRect();
+                    confetti.style.left = (rect.left + rect.width / 2 + (Math.random() * 100 - 50)) + 'px';
+                    confetti.style.top = (rect.top + (Math.random() * 50 - 25)) + 'px';
+                    
+                    document.body.appendChild(confetti);
+                    setTimeout(() => confetti.remove(), 1000);
+                }, i * 100);
+            }
+        }
+
+        // Initialize Background
+        createBackgroundElements();
+
+    </script>
+</body>
+</html>
